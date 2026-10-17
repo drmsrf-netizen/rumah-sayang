@@ -1,0 +1,1056 @@
+<title>Rumah Sayang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap">
+<style>
+/* Layout: full-screen 3D living room; HUD pinned to the top edge, spoken caption + big choice cards docked at the bottom (thumb reach on tablets). Single deliberate daytime look. */
+:root{
+  --sky:#CDE8F6;
+  --ink:#1F2B57;
+  --muted:#56638C;
+  --mango:#FFB21E;
+  --pandan:#2F9A72;
+  --coral:#EF6B57;
+  --paper:#FFFDF6;
+  --card:#FFFFFF;
+  --line:#D9E3F2;
+  --shade:rgba(31,43,87,.18);
+  --scrim:rgba(20,30,64,.55);
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --text:"Andika","Segoe UI",system-ui,sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--sky);color:var(--ink);font-family:var(--text);font-size:16px;overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#stage{position:fixed;inset:0}
+#stage canvas{display:block;width:100%;height:100%}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible{outline:4px solid var(--mango);outline-offset:3px}
+
+/* HUD */
+.hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 12px) max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px));pointer-events:none;z-index:5}
+.hud > div{display:flex;gap:8px;flex-wrap:wrap;pointer-events:auto}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--paper);border-radius:999px;padding:6px 14px;font-family:var(--display);font-weight:800;font-size:1.15rem;box-shadow:0 3px 0 var(--shade);font-variant-numeric:tabular-nums;min-height:44px}
+.chip small{font-family:var(--text);font-weight:700;font-size:.8rem;color:var(--muted)}
+.chip.btn{cursor:pointer}
+.lang span{opacity:.4}
+.lang span.on{opacity:1;color:var(--pandan)}
+#parentBtn{position:relative;overflow:hidden}
+#parentBtn .fill{position:absolute;inset:0;background:var(--mango);opacity:.35;transform:scaleX(0);transform-origin:left}
+#parentBtn.holding .fill{transform:scaleX(1);transition:transform 1s linear}
+
+/* Need bubbles above pets */
+.bubble{position:fixed;left:0;top:0;transform:translate(-50%,-100%);background:var(--card);border-radius:22px;padding:6px 12px;display:flex;align-items:center;gap:6px;box-shadow:0 4px 0 var(--shade);font-family:var(--display);font-weight:800;font-size:1rem;pointer-events:none;z-index:3;white-space:nowrap}
+.bubble::after{content:"";position:absolute;bottom:-10px;left:50%;margin-left:-8px;border:8px solid transparent;border-top-color:var(--card);border-bottom:0}
+.bubble .ico{font-size:2.1rem;line-height:1}
+.bubble.pulse{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:translate(-50%,-108%) scale(1.06)}}
+.nametag{position:fixed;left:0;top:0;transform:translate(-50%,0);font-family:var(--display);font-weight:800;font-size:.95rem;color:var(--ink);background:rgba(255,253,246,.85);padding:0 10px;border-radius:999px;pointer-events:none;z-index:2}
+
+/* Bottom dock */
+.dock{position:fixed;left:0;right:0;bottom:0;padding:0 max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(12px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;align-items:center;gap:10px;z-index:4;pointer-events:none}
+.caption{pointer-events:auto;max-width:640px;width:100%;background:var(--paper);border-radius:20px;padding:10px 12px 10px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 0 var(--shade);font-size:1.15rem;line-height:1.4;min-height:56px}
+.caption p{margin:0;flex:1;min-width:0;text-wrap:pretty}
+.caption button{flex:none;width:48px;height:48px;border-radius:50%;background:var(--sky);font-size:1.4rem}
+.tray{pointer-events:auto;display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:640px}
+.choice{width:118px;min-height:118px;background:var(--card);border-radius:24px;box-shadow:0 6px 0 var(--shade);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 6px;transition:transform .12s}
+.choice:active{transform:translateY(4px);box-shadow:0 2px 0 var(--shade)}
+.choice .ico{font-size:3.2rem;line-height:1.1}
+.choice .lbl{font-weight:700;font-size:.92rem;line-height:1.2;text-align:center}
+.choice.no{opacity:.35;filter:grayscale(1);pointer-events:none}
+.choice.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.bism{pointer-events:auto;background:var(--pandan);color:#fff;border-radius:28px;padding:14px 34px;box-shadow:0 6px 0 #1E6B4F;display:flex;flex-direction:column;align-items:center;animation:pulse2 1.6s ease-in-out infinite}
+.bism .ar{font-size:2.2rem;line-height:1.3;font-family:"Amiri","Traditional Arabic","Geeza Pro",serif}
+.bism .lt{font-family:var(--display);font-weight:800;font-size:1.4rem}
+@keyframes pulse2{50%{transform:scale(1.05)}}
+
+/* Floating hearts and flying items */
+.fx{position:fixed;left:0;top:0;pointer-events:none;z-index:6;font-size:2rem;line-height:1}
+
+/* Overlays */
+.overlay{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 16px) max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(16px,env(safe-area-inset-left,0px));z-index:10;overflow-y:auto}
+.panel{background:var(--paper);border-radius:28px;padding:28px 24px;max-width:460px;width:100%;text-align:center;box-shadow:0 10px 0 var(--shade);display:flex;flex-direction:column;align-items:center;gap:14px;margin:auto}
+.panel h1,.panel h2{font-family:var(--display);font-weight:800;margin:0;line-height:1.05;text-wrap:balance}
+.panel h1{font-size:3rem;color:var(--coral)}
+.panel h2{font-size:2rem}
+.panel p{margin:0;font-size:1.1rem;line-height:1.45;max-width:36ch;text-wrap:pretty}
+.big{font-size:4rem;line-height:1}
+.cta{background:var(--mango);border-radius:999px;padding:12px 40px;font-family:var(--display);font-weight:800;font-size:1.6rem;box-shadow:0 6px 0 #C7850B;min-height:60px}
+.cta:active{transform:translateY(4px);box-shadow:0 2px 0 #C7850B}
+.seg{display:flex;background:var(--sky);border-radius:999px;padding:4px;gap:4px}
+.seg button{border-radius:999px;padding:8px 18px;font-weight:700;font-size:1.05rem;min-height:44px}
+.seg button[aria-pressed="true"]{background:var(--card);box-shadow:0 2px 0 var(--shade)}
+.friends{display:flex;gap:10px;font-size:2.2rem}
+.friends span.lock{filter:grayscale(1);opacity:.35}
+
+/* Parent panel */
+.parent{text-align:left;align-items:stretch;max-width:520px}
+.parent h2{font-size:1.7rem}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stat{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:10px 12px}
+.stat b{display:block;font-family:var(--display);font-size:1.6rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:.85rem;color:var(--muted)}
+.parent ul{margin:0;padding-left:20px;line-height:1.5;font-size:.98rem}
+.parent .eyebrow{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+.ghost{border:2px solid var(--line);border-radius:999px;padding:8px 16px;font-weight:700;min-height:44px}
+.ghost.danger{color:var(--coral);border-color:var(--coral)}
+
+.vlist{display:flex;flex-direction:column;gap:6px;max-height:52vh;overflow-y:auto;padding-right:4px}
+.vsec{font-family:var(--display);font-weight:800;font-size:1.05rem;margin-top:8px}
+.vrow{display:grid;grid-template-columns:44px minmax(0,1fr) 52px;align-items:center;gap:8px;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:6px 8px}
+.vid{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.82rem;color:var(--muted)}
+.vtxt{font-size:.98rem;line-height:1.35}
+.vplay{width:44px;height:44px;border-radius:50%;background:var(--sky);font-size:1.1rem;justify-self:end}
+.vplay.on{background:var(--mango)}
+.vnone{font-size:.75rem;color:var(--muted);text-align:right}
+@media (max-width:520px){
+  .choice{width:96px;min-height:100px}
+  .choice .ico{font-size:2.6rem}
+  .choice .lbl{font-size:.82rem}
+  .caption{font-size:1.02rem}
+  .chip{font-size:1rem;padding:6px 11px}
+  .panel h1{font-size:2.5rem}
+}
+@media (prefers-reduced-motion:reduce){
+  .bubble.pulse,.bism{animation:none}
+}
+</style>
+
+<div id="stage"></div>
+
+<div class="hud">
+  <div>
+    <span class="chip" id="starChip" aria-label="Stars">⭐ <span id="stars">0</span></span>
+    <span class="chip" id="dayChip"><small id="dayLbl">Hari</small> <span id="dayNum">1</span></span>
+    <span class="chip" id="nextChip"></span>
+  </div>
+  <div>
+    <button class="chip btn lang" id="langBtn" aria-label="Language"><span data-l="ms">BM</span>|<span data-l="en">EN</span></button>
+    <button class="chip btn" id="soundBtn" aria-label="Sound">🔊</button>
+    <button class="chip btn" id="parentBtn" aria-label="Parents: press and hold"><span class="fill"></span>👪</button>
+  </div>
+</div>
+
+<div id="bubbles"></div>
+
+<div class="dock">
+  <div class="caption" id="caption" hidden>
+    <p id="captionText"></p>
+    <button id="replayBtn" aria-label="Say again">🔈</button>
+  </div>
+  <div class="tray" id="tray"></div>
+</div>
+
+<div class="overlay" id="startScreen">
+  <div class="panel">
+    <div class="big">🏡</div>
+    <h1>Rumah Sayang</h1>
+    <p id="tagline">Jaga kawan-kawan haiwan dengan hati yang penyayang.</p>
+    <div class="friends" id="startFriends"></div>
+    <div class="seg" role="group" aria-label="Language">
+      <button id="pickMs" aria-pressed="true">Bahasa Melayu</button>
+      <button id="pickEn" aria-pressed="false">English</button>
+    </div>
+    <button class="cta" id="playBtn">Main!</button>
+  </div>
+</div>
+
+<div class="overlay" id="modal" hidden><div class="panel" id="modalPanel"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ---------------- Data ---------------- */
+const ORDER = ["kitten","puppy","rabbit","bird"];
+const PETS = {
+  kitten:{name:"Oyen", emoji:"🐱", unlock:0,  kind:{en:"kitten", ms:"anak kucing"}},
+  puppy: {name:"Bobo", emoji:"🐶", unlock:5,  kind:{en:"puppy",  ms:"anak anjing"}},
+  rabbit:{name:"Gebu", emoji:"🐰", unlock:12, kind:{en:"bunny",  ms:"arnab"}},
+  bird:  {name:"Kiki", emoji:"🐦", unlock:20, kind:{en:"bird",   ms:"burung"}}
+};
+// pr = urgency, used for "who do we help first?"
+const NEEDS = {
+  hungry: {ico:"🍽️", en:"hungry",  ms:"lapar",      pr:5, w:3},
+  thirsty:{ico:"🌞",  en:"thirsty", ms:"dahaga",     pr:6, w:3},
+  dirty:  {ico:"🐾",  en:"dirty",   ms:"kotor",      pr:3, w:2},
+  sleepy: {ico:"💤",  en:"sleepy",  ms:"mengantuk",  pr:2, w:2},
+  bored:  {ico:"🥱",  en:"bored",   ms:"bosan",      pr:1, w:2},
+  lonely: {ico:"😢",  en:"lonely",  ms:"kesunyian",  pr:4, w:2},
+  hurt:   {ico:"🤕",  en:"hurt",    ms:"cedera",     pr:9, w:1},
+  sick:   {ico:"🤒",  en:"sick",    ms:"tidak sihat",pr:8, w:1}
+};
+const ITEMS = {
+  water:{ico:"💧", en:"Clean water", ms:"Air bersih"},
+  bed:{ico:"🛏️", en:"Soft bed", ms:"Tilam empuk"},
+  plaster:{ico:"🩹", en:"Plaster", ms:"Plaster"},
+  vet:{ico:"🩺", en:"See the vet", ms:"Jumpa doktor haiwan"},
+  hug:{ico:"🤗", en:"Gentle hug", ms:"Peluk lembut"},
+  fish:{ico:"🐟", en:"Fish", ms:"Ikan"},
+  yarn:{ico:"🧶", en:"Yarn ball", ms:"Bola benang"},
+  wipe:{ico:"🧽", en:"Soft wipe", ms:"Lap lembut"},
+  bone:{ico:"🦴", en:"Dog biscuit", ms:"Biskut anjing"},
+  ball:{ico:"🎾", en:"Ball", ms:"Bola"},
+  bath:{ico:"🛁", en:"Warm bath", ms:"Mandi air suam"},
+  greens:{ico:"🥬", en:"Leafy greens", ms:"Sayur hijau"},
+  tunnel:{ico:"📦", en:"Box tunnel", ms:"Terowong kotak"},
+  brush:{ico:"🖌️", en:"Soft brush", ms:"Berus lembut"},
+  seeds:{ico:"🌻", en:"Bird seeds", ms:"Biji-bijian"},
+  bell:{ico:"🔔", en:"Bell toy", ms:"Loceng mainan"},
+  birdbath:{ico:"🛁", en:"Bird bath", ms:"Mandi burung"},
+  cover:{ico:"🌙", en:"Cover the cage", ms:"Tutup sangkar"},
+  sing:{ico:"🎵", en:"Sing together", ms:"Nyanyi bersama"},
+  // unsafe choices, each with a gentle reason
+  choc:{ico:"🍫", en:"Chocolate", ms:"Coklat", harm:true,
+    why:{en:"Chocolate is poison for animals. It can make them very sick.", ms:"Coklat beracun untuk haiwan. Ia boleh buat mereka sakit teruk."}},
+  candy:{ico:"🍬", en:"Sweets", ms:"Gula-gula", harm:true,
+    why:{en:"Sweets are bad for animal teeth and tummies.", ms:"Gula-gula tak elok untuk gigi dan perut haiwan."}},
+  chili:{ico:"🌶️", en:"Chili", ms:"Cili", harm:true,
+    why:{en:"Chili is too hot! It will hurt their mouth.", ms:"Cili terlalu pedas! Mulut mereka akan pedih."}},
+  grapes:{ico:"🍇", en:"Grapes", ms:"Anggur", harm:true,
+    why:{en:"Grapes can make dogs very sick.", ms:"Anggur boleh buat anjing sakit teruk."}},
+  avocado:{ico:"🥑", en:"Avocado", ms:"Avokado", harm:true,
+    why:{en:"Avocado is poison for birds.", ms:"Avokado beracun untuk burung."}},
+  milk:{ico:"🥛", en:"Cow's milk", ms:"Susu lembu", harm:true,
+    why:{en:"Cow's milk gives cats a tummy ache. Clean water is best.", ms:"Susu lembu buat kucing sakit perut. Air bersih paling baik."}},
+  soda:{ico:"🥤", en:"Fizzy drink", ms:"Air bergas", harm:true,
+    why:{en:"Fizzy drinks are too sweet. Animals need clean water.", ms:"Air bergas terlalu manis. Haiwan perlukan air bersih."}}
+};
+const BASE_CARE = {thirsty:"water", sleepy:"bed", hurt:"plaster", sick:"vet", lonely:"hug"};
+const CARE = {
+  kitten:Object.assign({}, BASE_CARE, {hungry:"fish", bored:"yarn", dirty:"wipe"}),
+  puppy: Object.assign({}, BASE_CARE, {hungry:"bone", bored:"ball", dirty:"bath"}),
+  rabbit:Object.assign({}, BASE_CARE, {hungry:"greens", bored:"tunnel", dirty:"brush"}),
+  bird:  Object.assign({}, BASE_CARE, {hungry:"seeds", bored:"bell", dirty:"birdbath", sleepy:"cover", lonely:"sing"})
+};
+function harmsFor(pet, need){
+  if (need === "hungry"){
+    const h = ["choc","candy","chili"];
+    if (pet === "puppy") h.push("grapes");
+    if (pet === "bird") h.push("avocado");
+    return h;
+  }
+  if (need === "thirsty") return pet === "kitten" ? ["milk","soda"] : ["soda"];
+  return [];
+}
+const LEVEL_NAMES = {en:["Seedling","Sprout","Sapling","Tree"], ms:["Benih","Tunas","Anak pokok","Pokok"]};
+const TASKS_PER_DAY = 5;
+
+/* ---------------- State ---------------- */
+const KEY = "rumahsayang.v1";
+const fresh = () => ({lang:"ms", sound:true, stars:0, day:1, tasksToday:0, level:1, streak:0, struggle:0,
+  unlocked:["kitten"], stats:{tasks:0, firstTry:0, harmPicks:0, wrongPicks:0, priorityRight:0, priorityTotal:0, pats:0}});
+let S = fresh();
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(fresh(), JSON.parse(raw)); } catch(e){}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+const t = (en, ms) => S.lang === "ms" ? ms : en;
+const L = o => o[S.lang];
+const rand = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const $ = id => document.getElementById(id);
+
+/* ---------------- Audio: speech + chimes ---------------- */
+let actx = null, voices = [];
+function loadVoices(){ try { voices = speechSynthesis.getVoices() || []; } catch(e){ voices = []; } }
+if ("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function pickVoice(){
+  if (S.lang === "ms") return voices.find(v => /^ms/i.test(v.lang)) || voices.find(v => /^id/i.test(v.lang)) || null;
+  return voices.find(v => /^en[-_]GB/i.test(v.lang)) || voices.find(v => /^en/i.test(v.lang)) || null;
+}
+/* Recorded voice: each spoken line is a numbered clip (see the recording script).
+   A clip plays from voice/<lang>/<ID>.mp3 when it has been recorded; anything not yet
+   recorded falls back to the device's text-to-speech. */
+const CLIPS = /*CLIPS*/[];
+const RECORDED = /*RECORDED*/{ms:[], en:[]};
+const CLIP = {}; CLIPS.forEach(c => CLIP[c.id] = c);
+const recSet = {ms:new Set(RECORDED.ms), en:new Set(RECORDED.en)};
+const audioCache = {};
+function clipUrl(lang, id){
+  const key = lang + "/" + id;
+  if (!audioCache[key]) audioCache[key] = fetch("voice/" + lang + "/" + id + ".mp3")
+    .then(r => r.ok ? r.blob() : null).then(b => b ? URL.createObjectURL(b) : null).catch(() => null);
+  return audioCache[key];
+}
+function preloadVoice(){ recSet[S.lang].forEach(id => clipUrl(S.lang, id)); }
+let curAudio = null, speakToken = 0, lastIds = null;
+function stopVoice(){
+  if (curAudio){ try { curAudio.pause(); } catch(e){} curAudio = null; }
+  try { speechSynthesis.cancel(); } catch(e){}
+}
+function playUrl(url){
+  return new Promise(res => {
+    const a = new Audio(url); curAudio = a;
+    let done = false; const fin = () => { if (!done){ done = true; res(); } };
+    a.onended = fin; a.onerror = fin; a.play().catch(fin); setTimeout(fin, 20000);
+  });
+}
+function clipText(ids){ return ids.map(id => CLIP[id] ? CLIP[id][S.lang] : "").join(" "); }
+async function speak(ids, opts){
+  opts = opts || {};
+  const text = clipText(ids);
+  if (!opts.noCaption){ lastIds = ids; $("captionText").textContent = text; $("caption").hidden = false; }
+  const tok = ++speakToken; stopVoice();
+  if (!S.sound) return wait(Math.max(1400, Math.min(9000, 1200 + text.length*62) * 0.8));
+  const rec = recSet[S.lang], lang = S.lang;
+  if (!ids.some(id => rec.has(id))) return say(text, {noCaption:true});
+  for (const id of ids){
+    if (tok !== speakToken) return;
+    const url = rec.has(id) ? await clipUrl(lang, id) : null;
+    if (tok !== speakToken) return;
+    if (url){ await playUrl(url); await wait(120); }
+    else await say(CLIP[id][lang], {noCaption:true});
+  }
+}
+const PET_SEC = {kitten:"E", puppy:"F", rabbit:"G", bird:"H"};
+const NEED_ORDER = ["hungry","thirsty","dirty","sleepy","bored","lonely","hurt","sick"];
+const HARM_CLIP = {choc:"D01", candy:"D02", chili:"D03", grapes:"D04", avocado:"D05", milk:"D06", soda:"D07"};
+const pc = (pet, n) => PET_SEC[pet] + String(n).padStart(2, "0");
+const needClip = (pet, need) => pc(pet, 7 + NEED_ORDER.indexOf(need));
+
+let lastLine = "";
+function say(text, opts){
+  opts = opts || {};
+  if (!opts.noCaption){ lastLine = text; $("captionText").textContent = text; $("caption").hidden = false; }
+  const est = Math.min(9000, 1200 + text.length * 62);
+  if (!S.sound || !("speechSynthesis" in window)) return wait(Math.max(1400, est * 0.8));
+  return new Promise(res => {
+    let done = false; const fin = () => { if (!done){ done = true; res(); } };
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const v = pickVoice(); if (v) u.voice = v;
+      u.lang = v ? v.lang : (S.lang === "ms" ? "ms-MY" : "en-GB");
+      u.rate = 0.92; u.pitch = 1.12;
+      u.onend = fin; u.onerror = fin;
+      speechSynthesis.speak(u);
+    } catch(e){ fin(); }
+    setTimeout(fin, est + 1500);
+  });
+}
+function tone(freq, start, dur, type, vol){
+  if (!S.sound || !actx) return;
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type || "sine"; o.frequency.value = freq;
+  const t0 = actx.currentTime + start;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol || 0.18, t0 + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g).connect(actx.destination); o.start(t0); o.stop(t0 + dur + 0.05);
+}
+const sfx = {
+  good(){ [523,659,784,1047].forEach((f,i)=>tone(f, i*0.09, 0.35, "triangle", 0.16)); },
+  hmm(){ tone(330,0,0.25,"sine",0.12); tone(294,0.2,0.35,"sine",0.12); },
+  pop(){ tone(880,0,0.12,"sine",0.12); },
+  purr(){ tone(110,0,0.4,"sawtooth",0.04); tone(118,0.15,0.4,"sawtooth",0.04); },
+  unlock(){ [392,523,659,784,1047,1319].forEach((f,i)=>tone(f, i*0.08, 0.4, "triangle", 0.14)); }
+};
+
+/* ---------------- 3D scene ---------------- */
+const stage = $("stage");
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const DAY_BG = new THREE.Color("#CDE8F6"), NIGHT_BG = new THREE.Color("#22305E");
+scene.background = DAY_BG.clone();
+const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+let camAngle = 0, camDist = 8.5;
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0xd8b088, 0.85); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff0d4, 0.85);
+sun.position.set(4, 9, 6); sun.castShadow = true;
+sun.shadow.mapSize.set(1024,1024);
+Object.assign(sun.shadow.camera, {left:-8,right:8,top:8,bottom:-8,near:1,far:30});
+sun.shadow.radius = 4;
+scene.add(sun);
+const lamp = new THREE.PointLight(0xffb36b, 0, 12); lamp.position.set(-4.2, 3, 0.5); scene.add(lamp);
+
+function M(color, extra){ return new THREE.MeshStandardMaterial(Object.assign({color, roughness:0.75, metalness:0}, extra||{})); }
+function canvasTex(w, h, draw){
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  draw(c.getContext("2d"), w, h);
+  const tx = new THREE.CanvasTexture(c); tx.encoding = THREE.sRGBEncoding; return tx;
+}
+// Floor: warm timber planks
+const floorTex = canvasTex(512, 512, (g, w, h) => {
+  const tones = ["#E3B271","#DCA864","#E8BA7C","#D9A35F"];
+  for (let i=0;i<8;i++){ g.fillStyle = tones[i%4]; g.fillRect(0, i*64, w, 64); g.fillStyle="rgba(120,70,30,.18)"; g.fillRect(0, i*64, w, 3);
+    const off = (i*137)%512; g.fillRect(off, i*64, 3, 64); }
+});
+floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(3, 2);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(26, 16), M(0xffffff, {map:floorTex}));
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; scene.add(floor);
+// Back wall with a soft pucuk rebung (bamboo-shoot) triangle border, a songket motif
+const wallTex = canvasTex(512, 256, (g, w, h) => {
+  g.fillStyle = "#BFE0F1"; g.fillRect(0,0,w,h);
+  g.fillStyle = "#A9D3EA";
+  for (let x=0; x<w; x+=32){ g.beginPath(); g.moveTo(x, h); g.lineTo(x+16, h-34); g.lineTo(x+32, h); g.fill(); }
+  g.fillStyle = "#F7C65A"; g.fillRect(0, h-44, w, 6);
+  g.fillStyle = "rgba(255,255,255,.35)";
+  for (let y=20;y<h-60;y+=40) for (let x=(y/40%2)*20; x<w; x+=40){ g.beginPath(); g.arc(x, y, 3, 0, 7); g.fill(); }
+});
+wallTex.wrapS = THREE.RepeatWrapping; wallTex.repeat.set(4, 1);
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(26, 8), M(0xffffff, {map:wallTex}));
+wall.position.set(0, 4, -4); wall.receiveShadow = true; scene.add(wall);
+// Window
+const winGroup = new THREE.Group(); winGroup.position.set(3.4, 3.6, -3.95); scene.add(winGroup);
+const winGlass = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.8), new THREE.MeshBasicMaterial({color:0x9FD8F5}));
+winGroup.add(winGlass);
+const frameMat = M(0xffffff);
+[[0,0.95,2.6,0.12],[0,-0.95,2.6,0.12],[1.25,0,0.12,2],[-1.25,0,0.12,2],[0,0,0.08,1.8],[0,0,2.4,0.08]].forEach(f=>{
+  const b = new THREE.Mesh(new THREE.BoxGeometry(f[2], f[3], 0.1), frameMat); b.position.set(f[0], f[1], 0.05); winGroup.add(b);
+});
+const sunDisk = new THREE.Mesh(new THREE.CircleGeometry(0.28, 24), new THREE.MeshBasicMaterial({color:0xFFE07A}));
+sunDisk.position.set(0.6, 0.4, 0.01); winGroup.add(sunDisk);
+const moon = new THREE.Mesh(new THREE.CircleGeometry(0.24, 24), new THREE.MeshBasicMaterial({color:0xFFF6D8}));
+moon.position.set(-0.55, 0.45, 0.01); moon.visible = false; winGroup.add(moon);
+// Rug, plant, toy shelf
+const rug = new THREE.Mesh(new THREE.CylinderGeometry(4.3, 4.3, 0.04, 48), M(0x7CC9A6)); rug.position.y = 0.02; rug.receiveShadow = true; scene.add(rug);
+const rugRing = new THREE.Mesh(new THREE.TorusGeometry(3.9, 0.06, 6, 64), M(0xFFFDF6)); rugRing.rotation.x = Math.PI/2; rugRing.position.y = 0.05; scene.add(rugRing);
+const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.32, 0.7, 16), M(0xEF6B57)); pot.position.set(-5.6, 0.35, -3); pot.castShadow = true; scene.add(pot);
+for (let i=0;i<6;i++){ const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), M(0x2F9A72)); leaf.scale.set(0.6, 1.6, 0.3);
+  leaf.position.set(-5.6 + Math.cos(i)*0.25, 1.15 + (i%2)*0.2, -3 + Math.sin(i)*0.25); leaf.rotation.z = Math.cos(i*1.3)*0.6; leaf.castShadow = true; scene.add(leaf); }
+const shelf = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 0.6), M(0xF4D9A8)); shelf.position.set(-3.2, 2.6, -3.7); shelf.castShadow = true; scene.add(shelf);
+[[0xEF6B57,-3.9],[0xFFB21E,-3.3],[0x4D7FD6,-2.7]].forEach(b=>{ const s = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), M(b[0])); s.position.set(b[1], 2.86, -3.7); s.castShadow = true; scene.add(s); });
+
+/* ---------- Pets built from simple shapes ---------- */
+function part(geo, mat, pos, scale, parent, petId){
+  const m = new THREE.Mesh(geo, mat); if (pos) m.position.set(pos[0],pos[1],pos[2]); if (scale) m.scale.set(scale[0],scale[1],scale[2]);
+  m.castShadow = true; m.userData.petId = petId; parent.add(m); return m;
+}
+const SPH = new THREE.SphereGeometry(1, 24, 18);
+function addFace(head, petId, cfg){
+  const black = M(0x1F2340, {roughness:0.3}), white = M(0xffffff), pink = M(0xF59AA8);
+  const eyes = [];
+  [-1,1].forEach(s=>{
+    const eg = new THREE.Group(); eg.position.set(s*cfg.eyeX, cfg.eyeY, cfg.eyeZ); head.add(eg);
+    part(SPH, black, [0,0,0], [cfg.eyeR, cfg.eyeR*1.15, cfg.eyeR*0.7], eg, petId);
+    part(SPH, white, [cfg.eyeR*0.3, cfg.eyeR*0.35, cfg.eyeR*0.55], [cfg.eyeR*0.35,cfg.eyeR*0.35,cfg.eyeR*0.35], eg, petId);
+    eyes.push(eg);
+    if (cfg.cheeks) part(SPH, M(0xF7A7B0,{transparent:true,opacity:0.7}), [s*cfg.eyeX*1.55, cfg.eyeY-0.17, cfg.eyeZ-0.06], [0.07,0.045,0.03], head, petId);
+  });
+  return {eyes, pink};
+}
+function makeQuad(petId, c){
+  const root = new THREE.Group(), rig = new THREE.Group(); root.add(rig);
+  const fur = M(c.fur), belly = M(c.belly), dark = M(c.dark);
+  // cushion
+  const cush = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.9, 0.16, 32), M(c.cushion)); cush.position.y = 0.08; cush.receiveShadow = true; cush.castShadow = true; cush.userData.petId = petId; root.add(cush);
+  const cushRim = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.12, 10, 32), M(c.cushion)); cushRim.rotation.x = Math.PI/2; cushRim.position.y = 0.17; cushRim.userData.petId = petId; root.add(cushRim);
+  rig.position.y = 0.16;
+  const body = part(SPH, fur, [0,0.52,0], [0.5,0.43,0.62], rig, petId);
+  part(SPH, belly, [0,0.44,0.1], [0.4,0.32,0.5], rig, petId);
+  const legs = [];
+  [[-0.24,0.3],[0.24,0.3],[-0.24,-0.3],[0.24,-0.3]].forEach(p=>{
+    const lg = new THREE.Group(); lg.position.set(p[0], 0.32, p[1]); rig.add(lg);
+    part(new THREE.CylinderGeometry(0.1,0.1,0.3,10), fur, [0,-0.12,0], null, lg, petId);
+    part(SPH, belly, [0,-0.27,0.03], [0.12,0.07,0.14], lg, petId);
+    legs.push(lg);
+  });
+  const head = new THREE.Group(); head.position.set(0, 1.0, 0.48); rig.add(head);
+  part(SPH, fur, [0,0,0], [0.4,0.37,0.37], head, petId);
+  part(SPH, belly, [0,-0.11,0.28], [0.19,0.13,0.12], head, petId);
+  const face = addFace(head, petId, {eyeX:0.15, eyeY:0.05, eyeZ:0.31, eyeR:0.075, cheeks:true});
+  part(SPH, c.nose ? M(c.nose) : face.pink, [0,-0.05,0.4], [0.05,0.04,0.035], head, petId);
+  const tongue = part(new THREE.BoxGeometry(0.09,0.02,0.12), face.pink, [0,-0.2,0.38], null, head, petId); tongue.visible = false;
+  // ears
+  if (c.ears === "cat"){
+    [-1,1].forEach(s=>{ const e = part(new THREE.ConeGeometry(0.13,0.28,4), fur, [s*0.22,0.33,0], null, head, petId); e.rotation.z = -s*0.35;
+      const inner = part(new THREE.ConeGeometry(0.07,0.17,4), face.pink, [s*0.21,0.31,0.05], null, head, petId); inner.rotation.z = -s*0.35; });
+  } else if (c.ears === "dog"){
+    [-1,1].forEach(s=>{ const e = part(SPH, dark, [s*0.36,-0.02,0], [0.1,0.22,0.16], head, petId); e.rotation.z = s*0.35; });
+  } else {
+    [-1,1].forEach(s=>{ const eg = new THREE.Group(); eg.position.set(s*0.13,0.3,0); eg.rotation.z = -s*0.15; head.add(eg);
+      part(SPH, fur, [0,0.28,0], [0.09,0.3,0.06], eg, petId); part(SPH, face.pink, [0,0.28,0.035], [0.05,0.22,0.03], eg, petId); });
+  }
+  // tail
+  const tail = new THREE.Group(); tail.position.set(0, 0.62, -0.55); rig.add(tail);
+  if (c.tail === "long"){
+    const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0.25,-0.2), new THREE.Vector3(0,0.55,-0.15), new THREE.Vector3(0.05,0.7,0.02)]);
+    part(new THREE.TubeGeometry(curve, 16, 0.07, 8, false), fur, null, null, tail, petId);
+  } else if (c.tail === "wag"){
+    const tl = part(new THREE.ConeGeometry(0.08, 0.38, 8), fur, [0,0.16,-0.08], null, tail, petId); tl.rotation.x = -0.6;
+  } else {
+    part(SPH, belly, [0,-0.02,0], [0.15,0.15,0.15], tail, petId);
+  }
+  // stripes for the ginger kitten
+  if (c.stripes){ [0.15,0,-0.15].forEach(z=>{ const st = part(new THREE.TorusGeometry(0.47,0.03,6,24,Math.PI), dark, [0,0.52,z*1.6], null, rig, petId); st.rotation.y = Math.PI/2; st.scale.set(1,0.92,1); }); }
+  // mud spots + bandage (state visuals)
+  const mud = new THREE.Group(); rig.add(mud); const mudMat = M(0x7A5230, {roughness:1});
+  [[0.32,0.62,0.2],[-0.35,0.5,-0.1],[0.1,0.85,-0.25],[-0.15,0.32,0.45],[0.25,1.1,0.6]].forEach(p=> part(SPH, mudMat, p, [0.11,0.08,0.11], mud, petId));
+  mud.visible = false;
+  const bandage = part(new THREE.CylinderGeometry(0.115,0.115,0.12,12), M(0xFFFFFF), [0,-0.1,0], null, legs[0], petId); bandage.visible = false;
+  return {id:petId, root, rig, body, head, eyes:face.eyes, tail, legs, tongue, mud, bandage, wings:null, headTop:1.9, bodyMat:fur};
+}
+function makeBird(petId){
+  const root = new THREE.Group(), rig = new THREE.Group(); root.add(rig);
+  const green = M(0x5CC46B), yellow = M(0xFFD84A), wood = M(0xB9834F);
+  // perch stand
+  const base = part(new THREE.CylinderGeometry(0.6,0.7,0.12,24), M(0xFFB21E), [0,0.06,0], null, root, petId); base.receiveShadow = true;
+  part(new THREE.CylinderGeometry(0.05,0.05,1.2,10), wood, [0,0.7,0], null, root, petId);
+  const bar = part(new THREE.CylinderGeometry(0.045,0.045,0.9,10), wood, [0,1.3,0], null, root, petId); bar.rotation.z = Math.PI/2;
+  rig.position.y = 1.32;
+  const body = part(SPH, green, [0,0.33,0], [0.3,0.36,0.3], rig, petId);
+  part(SPH, yellow, [0,0.27,0.13], [0.2,0.25,0.2], rig, petId);
+  const head = new THREE.Group(); head.position.set(0,0.78,0.06); rig.add(head);
+  part(SPH, green, [0,0,0], [0.24,0.23,0.23], head, petId);
+  const face = addFace(head, petId, {eyeX:0.1, eyeY:0.04, eyeZ:0.19, eyeR:0.05, cheeks:true});
+  const beak = part(new THREE.ConeGeometry(0.06,0.16,8), M(0xFF9A3C), [0,-0.03,0.25], null, head, petId); beak.rotation.x = Math.PI/2;
+  part(new THREE.ConeGeometry(0.05,0.14,6), yellow, [0,0.24,-0.02], null, head, petId);
+  const tongue = part(new THREE.BoxGeometry(0.04,0.01,0.06), face.pink, [0,-0.08,0.24], null, head, petId); tongue.visible = false;
+  const wings = [];
+  [-1,1].forEach(s=>{ const wg = new THREE.Group(); wg.position.set(s*0.28,0.42,0); rig.add(wg);
+    part(SPH, M(0x3FA557), [s*0.04,-0.12,-0.02], [0.08,0.24,0.18], wg, petId); wings.push(wg); });
+  const tail = new THREE.Group(); tail.position.set(0,0.15,-0.25); rig.add(tail);
+  const tl = part(new THREE.ConeGeometry(0.1,0.4,6), M(0x3B83D6), [0,-0.12,-0.1], null, tail, petId); tl.rotation.x = -2.4;
+  const legs = [];
+  [-1,1].forEach(s=>{ const lg = new THREE.Group(); lg.position.set(s*0.09,0.02,0.04); rig.add(lg);
+    part(new THREE.CylinderGeometry(0.02,0.02,0.1,6), M(0xFF9A3C), [0,-0.03,0], null, lg, petId); legs.push(lg); });
+  const mud = new THREE.Group(); rig.add(mud); const mudMat = M(0x7A5230, {roughness:1});
+  [[0.2,0.4,0.15],[-0.22,0.3,0],[0.05,0.6,-0.2]].forEach(p=> part(SPH, mudMat, p, [0.07,0.05,0.07], mud, petId)); mud.visible = false;
+  const bandage = part(new THREE.BoxGeometry(0.1,0.05,0.12), M(0xffffff), [0,-0.05,0], null, wings[0], petId); bandage.visible = false;
+  return {id:petId, root, rig, body, head, eyes:face.eyes, tail, legs, tongue, mud, bandage, wings, headTop:2.55, bodyMat:green};
+}
+const PET_BUILD = {
+  kitten:()=>makeQuad("kitten",{fur:0xF29A45, belly:0xFFE8C8, dark:0xD8772A, cushion:0xEF6B57, ears:"cat", tail:"long", stripes:true}),
+  puppy: ()=>makeQuad("puppy", {fur:0xC58A5C, belly:0xF7E2C6, dark:0x7B4E2E, cushion:0x4D7FD6, ears:"dog", tail:"wag", nose:0x2A2230}),
+  rabbit:()=>makeQuad("rabbit",{fur:0xF5F1EE, belly:0xFFFFFF, dark:0xE2D8D2, cushion:0xFFB21E, ears:"bunny", tail:"puff"}),
+  bird:  ()=>makeBird("bird")
+};
+const pets = {};  // id -> object with runtime state
+function layoutPets(){
+  const ids = ORDER.filter(id => S.unlocked.includes(id));
+  ids.forEach(id=>{
+    if (!pets[id]){
+      const o = PET_BUILD[id](); o.need = null; o.hop = -1; o.tilt = -1; o.phase = Math.random()*6; o.sleeping = false;
+      o.root.scale.setScalar(0.001); o.grow = 0;
+      scene.add(o.root); pets[id] = o;
+      const b = document.createElement("div"); b.className = "bubble"; b.hidden = true; b.innerHTML = '<span class="ico"></span><span class="w"></span>';
+      $("bubbles").appendChild(b); o.bubble = b;
+      const n = document.createElement("div"); n.className = "nametag"; n.textContent = PETS[id].name; $("bubbles").appendChild(n); o.tag = n;
+    }
+  });
+  const gap = 2.1;
+  ids.forEach((id, i)=>{ const x = (i - (ids.length-1)/2) * gap; pets[id].root.position.set(x, 0, 0.4 - Math.abs(x)*0.18); pets[id].root.rotation.y = -x*0.07; });
+}
+
+/* ---------- Camera, resize, projection ---------- */
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  const n = S.unlocked.length;
+  const need = 5 + n * 1.6; // world width the pets need
+  camDist = Math.max(8.2, need / (2 * Math.tan(THREE.MathUtils.degToRad(21)) * camera.aspect) * 0.95);
+  camDist = Math.min(camDist, 22);
+  camera.updateProjectionMatrix();
+}
+window.addEventListener("resize", resize);
+const vTmp = new THREE.Vector3();
+function toScreen(o, y){
+  o.root.updateMatrixWorld();
+  vTmp.set(0, y, 0); o.root.localToWorld(vTmp); vTmp.project(camera);
+  return {x:(vTmp.x+1)/2*window.innerWidth, y:(1-vTmp.y)/2*window.innerHeight};
+}
+
+/* ---------- Day / night ---------- */
+let nightT = 0, nightTarget = 0;
+function setNight(on){ nightTarget = on ? 1 : 0; }
+
+/* ---------- Animation loop ---------- */
+const clock = new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const time = clock.getElapsedTime();
+  nightT += (nightTarget - nightT) * 0.04;
+  scene.background.copy(DAY_BG).lerp(NIGHT_BG, nightT);
+  hemi.intensity = 0.85 - nightT*0.55; sun.intensity = 0.85 - nightT*0.7; lamp.intensity = nightT*1.3;
+  winGlass.material.color.set(0x9FD8F5).lerp(new THREE.Color(0x1B2550), nightT);
+  sunDisk.visible = nightT < 0.5; moon.visible = nightT >= 0.5;
+
+  const a = camAngle;
+  camera.position.set(Math.sin(a)*camDist, 3.3 + camDist*0.12, Math.cos(a)*camDist);
+  camera.lookAt(0, 0.95, 0);
+
+  for (const id in pets){
+    const o = pets[id], need = o.need, ph = o.phase;
+    if (o.grow < 1){ o.grow = Math.min(1, o.grow + 0.03); const g = o.grow; o.root.scale.setScalar(Math.max(0.001, 1 - Math.pow(1-g,3) * (1 + Math.sin(g*9)*0.1))); }
+    const sleepy = need === "sleepy" || o.sleeping;
+    const happy = !need && !o.sleeping;
+    let bob = Math.sin(time*(sleepy?1:2.2)+ph) * (sleepy?0.015:0.03);
+    if (need === "thirsty") bob = Math.sin(time*7+ph)*0.025;
+    o.rig.position.y = (o.wings ? 1.32 : 0.16) + bob;
+    o.rig.position.x = need === "sick" ? Math.sin(time*38)*0.012 : 0;
+    o.rig.rotation.set(0, need === "lonely" ? 0.7 : 0, need === "hurt" ? 0.08 : 0);
+    o.rig.scale.set(1, need === "bored" ? 0.9 : 1, 1);
+    o.head.rotation.set(sleepy || need==="lonely" || need==="sick" ? 0.3 : 0, need === "hungry" ? Math.sin(time*1.4+ph)*0.45 : 0, need === "bored" ? Math.sin(time*0.8)*0.12 : 0);
+    // eyes
+    let eyeY = 1;
+    if (sleepy) eyeY = 0.15; else if (need === "sick") eyeY = 0.55; else if ((time+ph) % 4.2 < 0.13) eyeY = 0.1;
+    o.eyes.forEach(e=> e.scale.y = eyeY);
+    o.tongue.visible = need === "thirsty";
+    o.mud.visible = need === "dirty";
+    if (o.tail){ const sp = happy ? 8 : 2, amp = happy ? 0.55 : 0.15; if (o.wings) o.tail.rotation.x = Math.sin(time*sp)*amp*0.3; else o.tail.rotation.y = Math.sin(time*sp+ph)*amp; }
+    o.legs.forEach(l=> l.rotation.x = 0);
+    if (need === "hurt" && !o.wings) o.legs[0].rotation.x = -0.9;
+    if (o.wings){ const f = o.hop >= 0 ? Math.sin(time*30)*0.9 : (need === "hurt" ? 0 : Math.sin(time*2+ph)*0.08); o.wings[0].rotation.z = need==="hurt"? 0.5 : -f; o.wings[1].rotation.z = f; }
+    // hop of joy
+    if (o.hop >= 0){ const p = (time - o.hop) / 0.95; if (p < 1){ o.rig.position.y += Math.sin(p*Math.PI)*0.65; o.rig.rotation.y += p*Math.PI*2; } else o.hop = -1; }
+    // puzzled head tilt after a wrong choice
+    if (o.tilt >= 0){ const p = (time - o.tilt) / 1.3; if (p < 1) o.head.rotation.z += Math.sin(p*Math.PI)*0.4; else o.tilt = -1; }
+    // DOM bubble + name
+    const top = toScreen(o, o.headTop + 0.15);
+    if (!o.bubble.hidden){ o.bubble.style.left = top.x + "px"; o.bubble.style.top = top.y + "px"; }
+    const base = toScreen(o, o.wings ? 0.05 : 0.02);
+    o.tag.style.left = base.x + "px"; o.tag.style.top = (base.y + 4) + "px";
+  }
+  renderer.render(scene, camera);
+}
+
+/* ---------- Touch: tap pets, drag to look around ---------- */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let drag = null;
+renderer.domElement.addEventListener("pointerdown", e=>{ drag = {x:e.clientX, a:camAngle, moved:false}; });
+window.addEventListener("pointermove", e=>{ if (!drag) return; const dx = e.clientX - drag.x; if (Math.abs(dx) > 8) drag.moved = true;
+  camAngle = Math.max(-0.5, Math.min(0.5, drag.a - dx*0.004)); });
+window.addEventListener("pointerup", e=>{
+  if (!drag) return; const d = drag; drag = null;
+  if (d.moved || e.target !== renderer.domElement) return;
+  ndc.set(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hits = ray.intersectObjects(Object.values(pets).map(o=>o.root), true);
+  const hit = hits.find(h => h.object.userData.petId);
+  if (hit) onPetTap(hit.object.userData.petId, e.clientX, e.clientY);
+});
+
+/* ---------- Effects ---------- */
+function hearts(x, y, n, ch){
+  for (let i=0;i<n;i++){
+    const s = document.createElement("span"); s.className = "fx"; s.textContent = ch || "💗";
+    document.body.appendChild(s);
+    const dx = (Math.random()-0.5)*140, dy = -90 - Math.random()*110;
+    const anim = s.animate([
+      {transform:`translate(${x-16}px,${y-16}px) scale(.4)`, opacity:0},
+      {transform:`translate(${x-16+dx*0.4}px,${y-16+dy*0.4}px) scale(1.1)`, opacity:1, offset:0.3},
+      {transform:`translate(${x-16+dx}px,${y-16+dy}px) scale(.9)`, opacity:0}
+    ], {duration:1300 + Math.random()*500, easing:"ease-out", delay:i*70});
+    anim.onfinish = ()=> s.remove();
+  }
+}
+function flyTo(ico, fromEl, o){
+  return new Promise(res=>{
+    const r = fromEl.getBoundingClientRect(), to = toScreen(o, o.headTop*0.55);
+    const s = document.createElement("span"); s.className = "fx"; s.style.fontSize = "3.2rem"; s.textContent = ico; document.body.appendChild(s);
+    const sx = r.left + r.width/2 - 26, sy = r.top + r.height/2 - 26, ex = to.x - 26, ey = to.y - 26;
+    const anim = s.animate([
+      {transform:`translate(${sx}px,${sy}px) scale(1)`},
+      {transform:`translate(${(sx+ex)/2}px,${Math.min(sy,ey)-120}px) scale(1.25)`, offset:0.5},
+      {transform:`translate(${ex}px,${ey}px) scale(.5)`, opacity:0.2}
+    ], {duration:650, easing:"ease-in-out"});
+    anim.onfinish = ()=>{ s.remove(); res(); };
+  });
+}
+
+/* ---------------- Game flow ---------------- */
+let task = null;   // current task
+let busy = false;  // narration / animation in progress
+
+function petName(id){ return PETS[id].name; }
+function needWord(n){ return NEEDS[n][S.lang]; }
+function itemLabel(k){ return ITEMS[k][S.lang]; }
+function unlockedIds(){ return ORDER.filter(id => S.unlocked.includes(id)); }
+
+function weightedNeed(exclude){
+  const pool = [];
+  for (const k in NEEDS){ if (exclude.includes(k)) continue; for (let i=0;i<NEEDS[k].w;i++) pool.push(k); }
+  return rand(pool);
+}
+let lastNeed = null, lastPet = null;
+
+function showBubble(o, on){
+  if (!on || !o.need){ o.bubble.hidden = true; o.bubble.classList.remove("pulse"); return; }
+  o.bubble.querySelector(".ico").textContent = NEEDS[o.need].ico;
+  o.bubble.querySelector(".w").textContent = S.level <= 2 ? needWord(o.need) : "";
+  o.bubble.hidden = false; o.bubble.classList.add("pulse");
+}
+function clearTray(){ $("tray").innerHTML = ""; }
+
+async function startTask(){
+  clearTray();
+  if (S.tasksToday >= TASKS_PER_DAY){ endDay(); return; }
+  const ids = unlockedIds();
+  Object.values(pets).forEach(o=>{ o.need = null; o.sleeping = false; showBubble(o, false); });
+
+  // Priority task: two friends need help at once
+  if (S.level >= 4 && ids.length >= 2 && Math.random() < 0.5){
+    const [a, b] = shuffle(ids.slice()).slice(0,2);
+    const na = weightedNeed([]);
+    let nb = weightedNeed([na]);
+    let guard = 0; while (NEEDS[nb].pr === NEEDS[na].pr && guard++ < 10) nb = weightedNeed([na]);
+    pets[a].need = na; pets[b].need = nb;
+    showBubble(pets[a], true); showBubble(pets[b], true);
+    const first = NEEDS[na].pr > NEEDS[nb].pr ? a : b;
+    task = {type:"priority", stage:"priority", ids:[a,b], first, wrongs:0, done:[]};
+    S.stats.priorityTotal++;
+    busy = true; await speak(["A04"]); busy = false;
+    return;
+  }
+
+  // Single task
+  let id = rand(ids); if (ids.length > 1 && id === lastPet) id = rand(ids.filter(x=>x!==lastPet));
+  const need = weightedNeed(lastNeed ? [lastNeed] : []);
+  lastPet = id; lastNeed = need;
+  const o = pets[id]; o.need = need;
+  const findFirst = S.level >= 3 && ids.length >= 2;
+  task = {type:"single", stage: findFirst ? "find" : "choose", ids:[id], active:id, wrongs:0};
+  showBubble(o, true);
+  busy = true;
+  if (findFirst){
+    await speak(["A03"]);
+  } else {
+    await askChoose(id, need);
+  }
+  busy = false;
+}
+
+async function askChoose(id, need){
+  task.stage = "choose"; task.active = id;
+  buildChoices(id, need);
+  if (S.level === 1) await speak([needClip(id, need), pc(id, 1)]);
+  else await speak([pc(id, 2), pc(id, 1)]);
+}
+
+function buildChoices(id, need){
+  const count = [2,3,4,4][S.level-1];
+  const correct = CARE[id][need];
+  const harms = S.level >= 2 ? shuffle(harmsFor(id, need).slice()) : [];
+  const others = shuffle(Object.keys(CARE[id]).filter(k=>k!==need).map(k=>CARE[id][k]).filter((v,i,a)=>v!==correct && a.indexOf(v)===i));
+  const picks = [correct];
+  const harmN = harms.length ? (S.level >= 4 ? 2 : 1) : 0;
+  harms.slice(0, harmN).forEach(h=> picks.length < count && picks.push(h));
+  others.forEach(k=> picks.length < count && picks.push(k));
+  shuffle(picks);
+  const tray = $("tray"); tray.innerHTML = "";
+  picks.forEach(k=>{
+    const b = document.createElement("button"); b.className = "choice"; b.id = "c-" + k;
+    b.innerHTML = `<span class="ico">${ITEMS[k].ico}</span><span class="lbl">${itemLabel(k)}</span>`;
+    b.addEventListener("click", ()=> onChoice(k, b));
+    tray.appendChild(b);
+  });
+}
+
+async function onChoice(k, btn){
+  if (!task || task.stage !== "choose" || busy) return;
+  const id = task.active, o = pets[id], need = o.need, n = petName(id);
+  initAudio();
+  if (k === CARE[id][need]){
+    if (need === "hungry" || need === "thirsty"){
+      task.stage = "bism"; task.pendingItem = k; task.pendingBtn = btn.getBoundingClientRect();
+      sfx.pop();
+      const tray = $("tray"); tray.innerHTML = "";
+      const bb = document.createElement("button"); bb.className = "bism"; bb.id = "bismBtn";
+      bb.innerHTML = `<span class="ar" lang="ar">بِسْمِ ٱللَّٰهِ</span><span class="lt">Bismillah</span>`;
+      bb.addEventListener("click", onBismillah); tray.appendChild(bb);
+      busy = true;
+      await speak([need === "hungry" ? "B01" : "B02"]);
+      busy = false;
+      return;
+    }
+    await resolve(id, k, btn);
+    return;
+  }
+  // wrong choice: gentle explanation and retry
+  task.wrongs++; S.stats.wrongPicks++;
+  btn.classList.add("shake"); setTimeout(()=>{ btn.classList.remove("shake"); btn.classList.add("no"); }, 450);
+  o.tilt = clock.getElapsedTime(); sfx.hmm();
+  busy = true;
+  if (ITEMS[k].harm){
+    S.stats.harmPicks++;
+    await speak([HARM_CLIP[k], "A11"]);
+  } else {
+    await speak([pc(id, 3), needClip(id, need), "A05"]);
+  }
+  busy = false; save();
+}
+
+async function onBismillah(){
+  if (!task || task.stage !== "bism") return;
+  const b = $("bismBtn"); const r = b.getBoundingClientRect();
+  hearts(r.left + r.width/2, r.top, 5, "✨");
+  busy = true;
+  await speak(["B03"], {noCaption:true});
+  busy = false;
+  await resolve(task.active, task.pendingItem, b);
+}
+
+const PRAISE = {
+  en:["You looked carefully and chose well!","Kind hands, kind heart!","That was a smart choice!","{n} feels loved!","Well done! You helped {n}."],
+  ms:["Kamu perhati dengan teliti dan pilih dengan betul!","Tangan baik, hati baik!","Pilihan yang bijak!","{n} rasa disayangi!","Syabas! Kamu sudah tolong {n}."]
+};
+const VALUES = {
+  en:["Looking after animals is a big responsibility. You did it!","Allah loves people who are gentle and kind.","When we care for others, we show love.","A good friend notices when someone needs help."],
+  ms:["Menjaga haiwan ialah tanggungjawab yang besar. Kamu berjaya!","Allah sayang orang yang lemah lembut dan baik hati.","Bila kita jaga orang lain, kita tunjukkan kasih sayang.","Kawan yang baik perasan bila orang lain perlukan bantuan."]
+};
+let praiseCount = 0;
+
+async function resolve(id, k, fromEl){
+  const o = pets[id], need = o.need, n = petName(id);
+  task.stage = "anim"; busy = true;
+  const src = fromEl instanceof Element ? fromEl : null;
+  if (src) await flyTo(ITEMS[k].ico, src, o);
+  clearTray();
+  o.need = null; showBubble(o, false);
+  if (need === "hurt") o.bandage.visible = true;
+  o.hop = clock.getElapsedTime();
+  const p = toScreen(o, o.headTop*0.7); hearts(p.x, p.y, 7);
+  sfx.good();
+  S.stars++; S.tasksToday++; S.stats.tasks++;
+  if (task.wrongs === 0){ S.stats.firstTry++; S.streak++; S.struggle = 0; }
+  else { S.streak = 0; if (task.wrongs >= 2) S.struggle++; }
+  updateHud(); save();
+
+  const line = [rand(["C01","C02","C03","C04","C05"])];
+  praiseCount++;
+  if (id === "puppy" && need === "thirsty") line.push("B10");
+  else if (praiseCount % 2 === 0) line.push(rand(["B06","B07","B08","B09"]));
+  await speak(line);
+  await wait(300);
+
+  // difficulty adapts quietly
+  let levelUp = false;
+  if (S.streak >= 3 && S.level < 4){ S.level++; S.streak = 0; levelUp = true; }
+  if (S.struggle >= 2 && S.level > 1){ S.level--; S.struggle = 0; }
+  save();
+
+  // second friend in a priority task
+  if (task.type === "priority"){
+    task.done.push(id);
+    const other = task.ids.find(x => !task.done.includes(x));
+    if (other && pets[other].need){
+      task.wrongs = 0;
+      await speak([pc(other, 4)]);
+      await askChoose(other, pets[other].need);
+      busy = false; return;
+    }
+  }
+  if (levelUp) await speak(["A09"]);
+  busy = false;
+  if (await checkUnlock()) return;
+  startTask();
+}
+
+async function onPetTap(id, x, y){
+  initAudio();
+  const o = pets[id];
+  if (task && task.stage === "find" && !busy){
+    if (id === task.active){ sfx.pop(); busy = true; await askChoose(id, o.need); busy = false; }
+    else { o.tilt = clock.getElapsedTime(); sfx.hmm(); task.wrongs++; busy = true;
+      await speak(["A13"]); busy = false; }
+    return;
+  }
+  if (task && task.stage === "priority" && !busy){
+    const [a, b] = task.ids;
+    if (!task.ids.includes(id)){ o.tilt = clock.getElapsedTime(); busy = true;
+      await speak(["A12"]); busy = false; return; }
+    const first = task.first, second = first === a ? b : a;
+    busy = true;
+    if (id === first){
+      sfx.good(); if (task.wrongs === 0) S.stats.priorityRight++;
+      pets[second].bubble.classList.remove("pulse");
+      await speak(["A06", needClip(first, pets[first].need), "A07"]);
+      task.wrongs = 0;
+      await askChoose(first, pets[first].need);
+    } else {
+      task.wrongs++; o.tilt = clock.getElapsedTime(); sfx.hmm();
+      await speak(["A08", needClip(first, pets[first].need), pc(first, 5)]);
+    }
+    busy = false; save(); return;
+  }
+  // a loving pat
+  S.stats.pats++; save();
+  hearts(x, y, 3); sfx.purr();
+  if (!o.need) o.hop = clock.getElapsedTime();
+  if (o.need === "lonely" && task && task.stage === "choose" && task.active === id && !busy){
+    speak(["A10"]);
+  }
+}
+
+async function checkUnlock(){
+  const next = ORDER.find(id => !S.unlocked.includes(id) && S.stars >= PETS[id].unlock);
+  if (!next) return false;
+  S.unlocked.push(next); save();
+  layoutPets(); resize(); updateHud();
+  sfx.unlock();
+  const p = PETS[next];
+  openModal(`
+    <div class="big">${p.emoji}</div>
+    <h2>${t("A new friend!", "Kawan baru!")}</h2>
+    <p>${t(`Say hello to ${p.name} the ${p.kind.en}! A new friend means more love, and more responsibility.`,
+           `Kenalkan ${p.name}, si ${p.kind.ms}! Kawan baru bermakna lebih banyak kasih sayang, dan lebih banyak tanggungjawab.`)}</p>
+    <button class="cta" id="modalGo">${t("Hello, " + p.name + "!", "Hai, " + p.name + "!")}</button>`,
+    ()=> startTask());
+  speak([pc(next, 6)]);
+  return true;
+}
+
+async function endDay(){
+  task = null; clearTray();
+  setNight(true);
+  Object.values(pets).forEach(o=>{ o.need = null; o.sleeping = true; showBubble(o, false); });
+  busy = true;
+  await speak(["B04"]);
+  busy = false;
+  openModal(`
+    <div class="big">🌙</div>
+    <h2>${t("Day " + S.day + " done!", "Hari ke-" + S.day + " selesai!")}</h2>
+    <p>${t("You were responsible and kind today. Your friends feel safe and loved.", "Kamu sangat bertanggungjawab dan baik hati hari ini. Kawan-kawan kamu rasa selamat dan disayangi.")}</p>
+    <div class="friends">${unlockedIds().map(id=>PETS[id].emoji).join("")}</div>
+    <button class="cta" id="modalGo">${t("Good morning! ☀️", "Selamat pagi! ☀️")}</button>`,
+    ()=>{
+      S.day++; S.tasksToday = 0; save(); updateHud();
+      setNight(false);
+      Object.values(pets).forEach(o=>{ o.sleeping = false; o.bandage.visible = false; o.hop = clock.getElapsedTime() + Math.random()*0.4; });
+      (async ()=>{ busy = true; await wait(600); await speak(["B05"]); busy = false; startTask(); })();
+    });
+}
+
+/* ---------------- UI chrome ---------------- */
+function openModal(html, onGo){
+  $("modalPanel").className = "panel";
+  $("modalPanel").innerHTML = html; $("modal").hidden = false;
+  const go = $("modalGo");
+  if (go){ go.focus(); go.addEventListener("click", ()=>{ $("modal").hidden = true; onGo && onGo(); }); }
+}
+function updateHud(){
+  $("stars").textContent = S.stars;
+  $("dayLbl").textContent = t("Day", "Hari");
+  $("dayNum").textContent = S.day;
+  const next = ORDER.find(id => !S.unlocked.includes(id));
+  const nc = $("nextChip");
+  if (next){ nc.hidden = false; nc.innerHTML = `<span style="filter:grayscale(1);opacity:.5">${PETS[next].emoji}</span> ${PETS[next].unlock - S.stars}⭐`; nc.setAttribute("aria-label", t("Stars until the next friend", "Bintang lagi untuk kawan baru")); }
+  else nc.hidden = true;
+  document.querySelectorAll(".lang span").forEach(s=> s.classList.toggle("on", s.dataset.l === S.lang));
+  $("soundBtn").textContent = S.sound ? "🔊" : "🔇";
+}
+function refreshStart(){
+  $("pickMs").setAttribute("aria-pressed", S.lang === "ms"); $("pickEn").setAttribute("aria-pressed", S.lang === "en");
+  $("tagline").textContent = t("Look after your animal friends with a caring heart.", "Jaga kawan-kawan haiwan dengan hati yang penyayang.");
+  $("playBtn").textContent = t("Play!", "Main!");
+  $("startFriends").innerHTML = ORDER.map(id=>`<span class="${S.unlocked.includes(id)?"":"lock"}">${PETS[id].emoji}</span>`).join("");
+}
+function initAudio(){
+  if (actx) { if (actx.state === "suspended") actx.resume(); return; }
+  try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ actx = null; }
+}
+
+$("pickMs").addEventListener("click", ()=>{ S.lang = "ms"; save(); refreshStart(); });
+$("pickEn").addEventListener("click", ()=>{ S.lang = "en"; save(); refreshStart(); });
+$("playBtn").addEventListener("click", async ()=>{
+  initAudio(); preloadVoice(); $("startScreen").hidden = true; updateHud();
+  busy = true;
+  await speak([S.stars === 0 ? "A01" : "A02"]);
+  busy = false;
+  startTask();
+});
+$("langBtn").addEventListener("click", ()=>{
+  S.lang = S.lang === "ms" ? "en" : "ms"; save(); updateHud();
+  Object.values(pets).forEach(o=>{ if (!o.bubble.hidden) showBubble(o, true); });
+  if (task && task.stage === "choose") { const o = pets[task.active]; buildChoices(task.active, o.need); }
+  preloadVoice();
+  if (lastIds) speak(lastIds);
+});
+$("soundBtn").addEventListener("click", ()=>{ S.sound = !S.sound; save(); updateHud(); if (!S.sound) stopVoice(); });
+$("replayBtn").addEventListener("click", ()=>{ initAudio(); if (lastIds) speak(lastIds); });
+
+// Parent area: press and hold so small fingers don't open it by accident
+let holdTimer = null;
+const pb = $("parentBtn");
+pb.addEventListener("pointerdown", ()=>{ pb.classList.add("holding"); holdTimer = setTimeout(()=>{ pb.classList.remove("holding"); openParents(); }, 1000); });
+["pointerup","pointerleave","pointercancel"].forEach(ev=> pb.addEventListener(ev, ()=>{ pb.classList.remove("holding"); clearTimeout(holdTimer); }));
+pb.addEventListener("keydown", e=>{ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openParents(); } });
+
+function openParents(){
+  const st = S.stats, pct = st.tasks ? Math.round(st.firstTry / st.tasks * 100) : 0;
+  const pr = st.priorityTotal ? `${st.priorityRight}/${st.priorityTotal}` : "–";
+  $("modalPanel").className = "panel parent";
+  $("modalPanel").innerHTML = `
+    <span class="eyebrow">${t("For parents and teachers", "Untuk ibu bapa dan guru")}</span>
+    <h2>${t("Progress", "Kemajuan")}</h2>
+    <div class="stats">
+      <div class="stat"><b>${st.tasks}</b><span>${t("Times a pet was helped", "Kali membantu haiwan")}</span></div>
+      <div class="stat"><b>${pct}%</b><span>${t("Right on the first try", "Betul pada cubaan pertama")}</span></div>
+      <div class="stat"><b>${L(LEVEL_NAMES)[S.level-1]}</b><span>${t("Current challenge (level " + S.level + " of 4)", "Tahap cabaran (" + S.level + " daripada 4)")}</span></div>
+      <div class="stat"><b>${pr}</b><span>${t("Who-first decisions right", "Keputusan siapa dulu betul")}</span></div>
+      <div class="stat"><b>${st.harmPicks}</b><span>${t("Unsafe foods picked (explained)", "Makanan tak selamat dipilih (diterangkan)")}</span></div>
+      <div class="stat"><b>${st.pats}</b><span>${t("Gentle pats given", "Usapan lembut")}</span></div>
+      <div class="stat"><b>${recSet.ms.size}/${CLIPS.length}</b><span>${t("BM lines in recorded voice", "Ayat BM dengan suara rakaman")}</span></div>
+      <div class="stat"><b>${recSet.en.size}/${CLIPS.length}</b><span>${t("English lines in recorded voice", "Ayat BI dengan suara rakaman")}</span></div>
+    </div>
+    <div>
+      <span class="eyebrow">${t("What your child practises", "Apa yang anak anda latih")}</span>
+      <ul>
+        <li>${t("Observing: reading each pet's bubble and body cues (muddy paws, droopy eyes, a raised sore paw).", "Memerhati: membaca gelembung dan isyarat badan haiwan (kaki berlumpur, mata layu, kaki yang sakit).")}</li>
+        <li>${t("Deciding: matching the need to the right care, and spotting unsafe foods.", "Membuat keputusan: memadankan keperluan dengan penjagaan yang betul, dan mengenal pasti makanan tak selamat.")}</li>
+        <li>${t("Prioritising: choosing who to help first when two friends need help (from level 4, with 2+ pets).", "Mengutamakan: memilih siapa ditolong dulu bila dua kawan perlukan bantuan (tahap 4, dengan 2+ haiwan).")}</li>
+        <li>${t("Values: Bismillah before food and drink, gentleness, responsibility and love.", "Nilai: Bismillah sebelum makan dan minum, kelembutan, tanggungjawab dan kasih sayang.")}</li>
+      </ul>
+    </div>
+    <p style="font-size:.95rem;color:var(--muted)">${t("The challenge adjusts by itself: three right in a row makes it harder; repeated mistakes make it easier. Mistakes are always explained, never punished. Progress is saved on this device only.", "Tahap cabaran berubah sendiri: tiga kali betul berturut-turut jadikan ia lebih sukar; banyak kesilapan jadikan ia lebih mudah. Kesilapan sentiasa diterangkan, tidak dihukum. Kemajuan disimpan pada peranti ini sahaja.")}</p>
+    <button class="ghost" id="voiceCheckBtn">🎧 ${t("Listen to and check the recorded voice", "Dengar dan semak suara rakaman")}</button>
+    <div class="row">
+      <button class="ghost danger" id="resetBtn">${t("Reset progress", "Set semula kemajuan")}</button>
+      <button class="cta" id="modalGo" style="font-size:1.2rem;padding:8px 28px;min-height:48px">${t("Close", "Tutup")}</button>
+    </div>`;
+  $("modal").hidden = false;
+  $("modalGo").addEventListener("click", ()=>{ $("modal").hidden = true; });
+  $("voiceCheckBtn").addEventListener("click", openVoiceCheck);
+  let armed = false;
+  $("resetBtn").addEventListener("click", e=>{
+    if (!armed){ armed = true; e.target.textContent = t("Tap again to confirm", "Tekan lagi untuk sahkan"); return; }
+    try { localStorage.removeItem(KEY); } catch(err){}
+    location.reload();
+  });
+}
+
+// Listen-and-check list: play every recorded line next to its script text
+function openVoiceCheck(){
+  initAudio();
+  const SEC_NAMES = {A:"Sambutan & arahan", B:"Bismillah, siang & malam, nilai", C:"Pujian", D:"Makanan tak selamat", E:"Oyen", F:"Bobo", G:"Gebu", H:"Kiki"};
+  let html = `<span class="eyebrow">${t("Recorded voice", "Suara rakaman")}</span>
+    <h2>${t("Listen and check", "Dengar dan semak")}</h2>
+    <p style="font-size:.95rem;color:var(--muted)">${t("Tap ▶ and check that each voice matches the words beside it. If one doesn't, tell Claude its number (for example E07).", "Tekan ▶ dan pastikan setiap suara sepadan dengan ayat di sebelahnya. Jika tidak, beritahu Claude nombornya (contoh: E07).")}</p>
+    <div class="vlist">`;
+  let cur = "";
+  CLIPS.forEach(c => {
+    const s = c.id[0];
+    if (s !== cur){ cur = s; html += `<div class="vsec">${s} · ${SEC_NAMES[s]}</div>`; }
+    const has = recSet.ms.has(c.id);
+    html += `<div class="vrow"><span class="vid">${c.id}</span><span class="vtxt">${c.ms}</span>` +
+      (has ? `<button class="vplay" data-id="${c.id}" aria-label="Play ${c.id}">▶</button>` : `<span class="vnone">${t("Tablet voice", "Suara tablet")}</span>`) + `</div>`;
+  });
+  html += `</div><div class="row"><span></span><button class="cta" id="modalGo" style="font-size:1.2rem;padding:8px 28px;min-height:48px">${t("Close", "Tutup")}</button></div>`;
+  $("modalPanel").className = "panel parent";
+  $("modalPanel").innerHTML = html; $("modal").hidden = false;
+  $("modalGo").addEventListener("click", ()=>{ stopVoice(); $("modal").hidden = true; });
+  $("modalPanel").querySelectorAll(".vplay").forEach(b => b.addEventListener("click", async ()=>{
+    $("modalPanel").querySelectorAll(".vplay.on").forEach(x => x.classList.remove("on"));
+    b.classList.add("on"); stopVoice(); speakToken++;
+    const url = await clipUrl("ms", b.dataset.id);
+    if (url) await playUrl(url);
+    b.classList.remove("on");
+  }));
+}
+
+/* ---------------- Boot ---------------- */
+layoutPets(); resize(); updateHud(); refreshStart();
+if (S.day > 1 || S.stars > 0){ /* returning player */ }
+animate();
+})();
+</script>

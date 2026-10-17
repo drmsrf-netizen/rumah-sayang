@@ -1,0 +1,108 @@
+<title>Rumah Sayang Voice Script</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@700;800&display=swap">
+<style>
+/* Layout: one reading column, a script you hold beside the microphone; each section is one recording take with its own checkbox. Shares the game's sky/mango/pandan palette. */
+:root{
+  --bg:#F2F8FC; --surface:#FFFFFF; --fg:#1F2B57; --muted:#5A6790; --line:#D6E2F0;
+  --accent:#2F9A72; --mango:#FFB21E; --mango-ink:#5A3A00; --tone-bg:#FFF3D6; --tone-fg:#7A5200;
+  --display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --text:"Andika","Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#131B33; --surface:#1C2647; --fg:#EAF0FB; --muted:#A5B2D6; --line:#2F3B63;
+  --accent:#5CCB9E; --mango:#FFC24D; --mango-ink:#3A2600; --tone-bg:#3A3018; --tone-fg:#FFD98A; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#131B33; --surface:#1C2647; --fg:#EAF0FB; --muted:#A5B2D6; --line:#2F3B63;
+  --accent:#5CCB9E; --mango:#FFC24D; --mango-ink:#3A2600; --tone-bg:#3A3018; --tone-fg:#FFD98A; color-scheme:dark }
+body{background:var(--bg);color:var(--fg);font-family:var(--text);font-size:17px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:760px;margin:0 auto;padding-block:28px 64px;display:flex;flex-direction:column;gap:28px}
+h1,h2{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
+h1{font-size:2.4rem}
+h2{font-size:1.45rem}
+p{margin:0}
+.lede{color:var(--muted);max-width:62ch}
+code{font-family:var(--mono);font-size:.88em;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:0 5px}
+.progress{display:flex;align-items:center;gap:12px;font-weight:700}
+.bar{flex:1;height:12px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.how{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px 22px;display:grid;gap:14px}
+.how h2{font-size:1.25rem}
+.steps{margin:0;padding-left:22px;display:grid;gap:8px}
+.steps b{color:var(--fg)}
+.note{font-size:.95rem;color:var(--muted)}
+.sec{display:flex;flex-direction:column;gap:12px}
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:10px;z-index:2;border-bottom:2px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.sec-title{display:flex;gap:12px;align-items:center;min-width:0}
+.badge{flex:none;width:44px;height:44px;border-radius:12px;background:var(--mango);color:var(--mango-ink);font-family:var(--display);font-weight:800;font-size:1.5rem;display:grid;place-items:center}
+.sub{color:var(--muted);font-size:.9rem}
+.done{display:inline-flex;align-items:center;gap:8px;font-weight:700;border:2px solid var(--line);border-radius:99px;padding:6px 14px;cursor:pointer;min-height:44px}
+.done input{width:20px;height:20px;accent-color:var(--accent)}
+.done:has(input:checked){border-color:var(--accent);color:var(--accent)}
+.tip{color:var(--muted);font-style:italic}
+.lines{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.lines li{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.num{font-family:var(--mono);font-size:.85rem;color:var(--muted);padding-top:6px}
+.ms{font-size:1.35rem;font-weight:700;line-height:1.4}
+.en{color:var(--muted);font-size:.92rem}
+.tone{display:inline-block;margin-top:6px;font-size:.82rem;font-weight:700;background:var(--tone-bg);color:var(--tone-fg);border-radius:99px;padding:2px 10px}
+.hide-en .en{display:none}
+.toggle{align-self:flex-start;border:2px solid var(--line);background:var(--surface);color:var(--fg);border-radius:99px;padding:6px 14px;font:inherit;font-weight:700;cursor:pointer;min-height:44px}
+.toggle:focus-visible,.done:focus-within{outline:3px solid var(--mango);outline-offset:2px}
+@media (max-width:480px){ h1{font-size:1.9rem} .ms{font-size:1.18rem} .lines li{grid-template-columns:40px minmax(0,1fr);padding:12px} }
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:12px">
+    <h1>Skrip Rakaman Suara</h1>
+    <p class="lede">{{TOTAL}} short Bahasa Melayu lines for Rumah Sayang, in 8 sections. Each section is one recording, about 1–2 minutes long. When a line has been recorded, the game plays your voice instead of the tablet's voice.</p>
+    <div class="progress"><span id="progTxt">0 of 8 sections recorded</span><div class="bar"><i id="progBar"></i></div></div>
+  </header>
+
+  <section class="how">
+    <h2>How to record</h2>
+    <ol class="steps">
+      <li><b>Find a quiet, soft room.</b> A bedroom with curtains and a bed works well. Turn off the fan and air-conditioner and close the windows.</li>
+      <li><b>Use your phone's voice recorder.</b> Hold it about a hand's length (20–30 cm) from your mouth, slightly to the side.</li>
+      <li><b>Speak warmly and a little slower than normal</b>, as if talking to a 4-year-old. Smile while you speak; children can hear it.</li>
+      <li><b>One recording per section.</b> Read the lines in order. <b>Pause for about 2 seconds between lines</b> (count "satu, dua" silently). Don't read out the line numbers.</li>
+      <li><b>If you make a mistake</b>, stop and record that section again from the start. Each section is short.</li>
+      <li><b>Name each file by its section letter</b>: <code>A</code>, <code>B</code> … <code>H</code>. Any format is fine (m4a, mp3, wav, ogg).</li>
+      <li><b>Attach the files in our chat.</b> I'll split them into single lines, clean up background noise, even out the volume and put them into the game.</li>
+    </ol>
+    <p class="note">You can send sections as you finish them. Lines that aren't recorded yet keep using the tablet's voice, so the game always works.</p>
+  </section>
+
+  <button class="toggle" id="enToggle" aria-pressed="true">Hide English meaning</button>
+
+  <!--SECTIONS-->
+</div>
+
+<script>
+(function(){
+  var KEY = "rumahsayang.script.done";
+  var done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){ done = {}; }
+  var boxes = document.querySelectorAll(".done input");
+  function render(){
+    var n = 0; boxes.forEach(function(b){ if (b.checked) n++; });
+    document.getElementById("progTxt").textContent = n + " of " + boxes.length + " sections recorded";
+    document.getElementById("progBar").style.width = (n / boxes.length * 100) + "%";
+  }
+  boxes.forEach(function(b){
+    b.checked = !!done[b.dataset.sec];
+    b.addEventListener("change", function(){ done[b.dataset.sec] = b.checked; try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){} render(); });
+  });
+  render();
+  var t = document.getElementById("enToggle");
+  t.addEventListener("click", function(){
+    var hide = document.body.classList.toggle("hide-en");
+    t.setAttribute("aria-pressed", String(!hide));
+    t.textContent = hide ? "Show English meaning" : "Hide English meaning";
+  });
+})();
+</script>

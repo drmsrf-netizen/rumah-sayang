@@ -1,0 +1,542 @@
+[
+{
+"id": "A01",
+"ms": "Selamat datang ke Rumah Sayang! Ini Oyen. Oyen perlukan seseorang yang baik hati untuk menjaganya. Boleh kamu tolong?",
+"en": "Welcome to Rumah Sayang! This is Oyen. Oyen needs someone kind to look after him. Can you help?",
+"note": "Ceria, mesra"
+},
+{
+"id": "A02",
+"ms": "Selamat kembali! Kawan-kawan rindu kamu.",
+"en": "Welcome back! Your friends missed you.",
+"note": "Gembira"
+},
+{
+"id": "A03",
+"ms": "Ada kawan perlukan bantuan! Perhatikan dan tekan kawan yang perlukan kamu.",
+"en": "Someone needs help! Look carefully and tap the friend who needs you.",
+"note": ""
+},
+{
+"id": "A04",
+"ms": "Dua kawan perlukan bantuan! Lihat kedua-duanya. Siapa patut kita tolong dulu? Tekan kawan itu.",
+"en": "Two friends need help! Look at both of them. Who should we help first? Tap that friend.",
+"note": ""
+},
+{
+"id": "A05",
+"ms": "Cuba lagi!",
+"en": "Try again!",
+"note": "Memberi semangat"
+},
+{
+"id": "A06",
+"ms": "Betul!",
+"en": "Yes!",
+"note": "Gembira"
+},
+{
+"id": "A07",
+"ms": "Itu lebih penting, jadi kita tolong dia dulu.",
+"en": "That is more urgent, so we help them first.",
+"note": ""
+},
+{
+"id": "A08",
+"ms": "Kawan ini pun perlukan bantuan. Tapi lihat dulu kawan yang satu lagi.",
+"en": "This friend needs help too. But look at the other friend first.",
+"note": "Lembut, tidak memarahi"
+},
+{
+"id": "A09",
+"ms": "Kamu semakin pandai! Jom cuba yang lebih mencabar sedikit.",
+"en": "You are getting so good at this! Let's try something a little harder.",
+"note": ""
+},
+{
+"id": "A10",
+"ms": "Dia suka sentuhan lembut kamu. Pilihan mana tunjuk kasih sayang?",
+"en": "They like your gentle touch. Which choice shows love?",
+"note": ""
+},
+{
+"id": "A11",
+"ms": "Jom pilih yang selamat.",
+"en": "Let's choose something safe.",
+"note": ""
+},
+{
+"id": "A12",
+"ms": "Kawan ini tak apa-apa. Lihat dua kawan yang ada gelembung.",
+"en": "This friend is fine. Look at the two friends with bubbles.",
+"note": ""
+},
+{
+"id": "A13",
+"ms": "Kawan ini sedang gembira. Cari kawan yang ada gelembung.",
+"en": "This friend is happy right now. Look for the friend with a bubble.",
+"note": ""
+},
+{
+"id": "B01",
+"ms": "Pilihan yang bagus! Sebelum makan, kita baca Bismillah. Tekan untuk baca Bismillah.",
+"en": "Good choice! Before eating, we say Bismillah. Tap to say Bismillah.",
+"note": ""
+},
+{
+"id": "B02",
+"ms": "Pilihan yang bagus! Sebelum minum, kita baca Bismillah. Tekan untuk baca Bismillah.",
+"en": "Good choice! Before drinking, we say Bismillah. Tap to say Bismillah.",
+"note": ""
+},
+{
+"id": "B03",
+"ms": "Bismillah.",
+"en": "Bismillah.",
+"note": "Perlahan dan jelas"
+},
+{
+"id": "B04",
+"ms": "Alhamdulillah! Hari ini kamu tolong kawan-kawan lima kali. Mereka sudah mengantuk. Selamat malam!",
+"en": "Alhamdulillah! Today you helped your friends five times. They are sleepy now. Good night!",
+"note": "Tenang, suara waktu tidur"
+},
+{
+"id": "B05",
+"ms": "Selamat pagi! Jom jaga kawan-kawan lagi.",
+"en": "Good morning! Let's look after our friends again.",
+"note": "Ceria"
+},
+{
+"id": "B06",
+"ms": "Menjaga haiwan ialah tanggungjawab yang besar. Kamu berjaya!",
+"en": "Looking after animals is a big responsibility. You did it!",
+"note": ""
+},
+{
+"id": "B07",
+"ms": "Allah sayang orang yang lemah lembut dan baik hati.",
+"en": "Allah loves people who are gentle and kind.",
+"note": ""
+},
+{
+"id": "B08",
+"ms": "Bila kita jaga orang lain, kita tunjukkan kasih sayang.",
+"en": "When we care for others, we show love.",
+"note": ""
+},
+{
+"id": "B09",
+"ms": "Kawan yang baik perasan bila orang lain perlukan bantuan.",
+"en": "A good friend notices when someone needs help.",
+"note": ""
+},
+{
+"id": "B10",
+"ms": "Dahulu, seorang lelaki memberi air kepada anjing yang dahaga, dan Allah sayang akan kebaikannya.",
+"en": "Long ago, a kind man gave water to a thirsty dog, and Allah loved his kindness.",
+"note": "Nada bercerita"
+},
+{
+"id": "C01",
+"ms": "Kamu perhati dengan teliti dan pilih dengan betul!",
+"en": "You looked carefully and chose well!",
+"note": "Bangga, gembira"
+},
+{
+"id": "C02",
+"ms": "Tangan baik, hati baik!",
+"en": "Kind hands, kind heart!",
+"note": "Bangga, gembira"
+},
+{
+"id": "C03",
+"ms": "Pilihan yang bijak!",
+"en": "That was a smart choice!",
+"note": "Bangga, gembira"
+},
+{
+"id": "C04",
+"ms": "Dia rasa disayangi!",
+"en": "They feel loved!",
+"note": "Bangga, gembira"
+},
+{
+"id": "C05",
+"ms": "Syabas! Kamu sudah menolong kawan.",
+"en": "Well done! You helped a friend.",
+"note": "Bangga, gembira"
+},
+{
+"id": "D01",
+"ms": "Coklat beracun untuk haiwan. Ia boleh buat mereka sakit teruk.",
+"en": "Chocolate is poison for animals. It can make them very sick.",
+"note": "Lembut, tidak menakutkan"
+},
+{
+"id": "D02",
+"ms": "Gula-gula tak elok untuk gigi dan perut haiwan.",
+"en": "Sweets are bad for animal teeth and tummies.",
+"note": "Lembut"
+},
+{
+"id": "D03",
+"ms": "Cili terlalu pedas! Mulut mereka akan pedih.",
+"en": "Chili is too hot! It will hurt their mouth.",
+"note": "Lembut"
+},
+{
+"id": "D04",
+"ms": "Anggur boleh buat anjing sakit teruk.",
+"en": "Grapes can make dogs very sick.",
+"note": "Lembut"
+},
+{
+"id": "D05",
+"ms": "Avokado beracun untuk burung.",
+"en": "Avocado is poison for birds.",
+"note": "Lembut"
+},
+{
+"id": "D06",
+"ms": "Susu lembu buat kucing sakit perut. Air bersih paling baik.",
+"en": "Cow's milk gives cats a tummy ache. Clean water is best.",
+"note": "Lembut"
+},
+{
+"id": "D07",
+"ms": "Air bergas terlalu manis. Haiwan perlukan air bersih.",
+"en": "Fizzy drinks are too sweet. Animals need clean water.",
+"note": "Lembut"
+},
+{
+"id": "E01",
+"ms": "Apa yang Oyen perlukan?",
+"en": "What does Oyen need?",
+"note": "Nada bertanya"
+},
+{
+"id": "E02",
+"ms": "Perhatikan Oyen baik-baik.",
+"en": "Look at Oyen carefully.",
+"note": ""
+},
+{
+"id": "E03",
+"ms": "Bukan itu yang Oyen perlukan sekarang.",
+"en": "That's not what Oyen needs right now.",
+"note": "Lembut"
+},
+{
+"id": "E04",
+"ms": "Sekarang jom tolong Oyen.",
+"en": "Now let's help Oyen.",
+"note": ""
+},
+{
+"id": "E05",
+"ms": "Tekan Oyen dulu.",
+"en": "Tap Oyen first.",
+"note": ""
+},
+{
+"id": "E07",
+"ms": "Oyen lapar.",
+"en": "Oyen is hungry.",
+"note": ""
+},
+{
+"id": "E08",
+"ms": "Oyen dahaga.",
+"en": "Oyen is thirsty.",
+"note": ""
+},
+{
+"id": "E09",
+"ms": "Oyen kotor.",
+"en": "Oyen is dirty.",
+"note": ""
+},
+{
+"id": "E10",
+"ms": "Oyen mengantuk.",
+"en": "Oyen is sleepy.",
+"note": ""
+},
+{
+"id": "E11",
+"ms": "Oyen bosan.",
+"en": "Oyen is bored.",
+"note": ""
+},
+{
+"id": "E12",
+"ms": "Oyen kesunyian.",
+"en": "Oyen is lonely.",
+"note": ""
+},
+{
+"id": "E13",
+"ms": "Oyen cedera.",
+"en": "Oyen is hurt.",
+"note": ""
+},
+{
+"id": "E14",
+"ms": "Oyen tidak sihat.",
+"en": "Oyen is sick.",
+"note": ""
+},
+{
+"id": "F01",
+"ms": "Apa yang Bobo perlukan?",
+"en": "What does Bobo need?",
+"note": "Nada bertanya"
+},
+{
+"id": "F02",
+"ms": "Perhatikan Bobo baik-baik.",
+"en": "Look at Bobo carefully.",
+"note": ""
+},
+{
+"id": "F03",
+"ms": "Bukan itu yang Bobo perlukan sekarang.",
+"en": "That's not what Bobo needs right now.",
+"note": "Lembut"
+},
+{
+"id": "F04",
+"ms": "Sekarang jom tolong Bobo.",
+"en": "Now let's help Bobo.",
+"note": ""
+},
+{
+"id": "F05",
+"ms": "Tekan Bobo dulu.",
+"en": "Tap Bobo first.",
+"note": ""
+},
+{
+"id": "F06",
+"ms": "Kawan baru! Kenalkan, Bobo.",
+"en": "A new friend! Say hello to Bobo.",
+"note": "Teruja"
+},
+{
+"id": "F07",
+"ms": "Bobo lapar.",
+"en": "Bobo is hungry.",
+"note": ""
+},
+{
+"id": "F08",
+"ms": "Bobo dahaga.",
+"en": "Bobo is thirsty.",
+"note": ""
+},
+{
+"id": "F09",
+"ms": "Bobo kotor.",
+"en": "Bobo is dirty.",
+"note": ""
+},
+{
+"id": "F10",
+"ms": "Bobo mengantuk.",
+"en": "Bobo is sleepy.",
+"note": ""
+},
+{
+"id": "F11",
+"ms": "Bobo bosan.",
+"en": "Bobo is bored.",
+"note": ""
+},
+{
+"id": "F12",
+"ms": "Bobo kesunyian.",
+"en": "Bobo is lonely.",
+"note": ""
+},
+{
+"id": "F13",
+"ms": "Bobo cedera.",
+"en": "Bobo is hurt.",
+"note": ""
+},
+{
+"id": "F14",
+"ms": "Bobo tidak sihat.",
+"en": "Bobo is sick.",
+"note": ""
+},
+{
+"id": "G01",
+"ms": "Apa yang Gebu perlukan?",
+"en": "What does Gebu need?",
+"note": "Nada bertanya"
+},
+{
+"id": "G02",
+"ms": "Perhatikan Gebu baik-baik.",
+"en": "Look at Gebu carefully.",
+"note": ""
+},
+{
+"id": "G03",
+"ms": "Bukan itu yang Gebu perlukan sekarang.",
+"en": "That's not what Gebu needs right now.",
+"note": "Lembut"
+},
+{
+"id": "G04",
+"ms": "Sekarang jom tolong Gebu.",
+"en": "Now let's help Gebu.",
+"note": ""
+},
+{
+"id": "G05",
+"ms": "Tekan Gebu dulu.",
+"en": "Tap Gebu first.",
+"note": ""
+},
+{
+"id": "G06",
+"ms": "Kawan baru! Kenalkan, Gebu.",
+"en": "A new friend! Say hello to Gebu.",
+"note": "Teruja"
+},
+{
+"id": "G07",
+"ms": "Gebu lapar.",
+"en": "Gebu is hungry.",
+"note": ""
+},
+{
+"id": "G08",
+"ms": "Gebu dahaga.",
+"en": "Gebu is thirsty.",
+"note": ""
+},
+{
+"id": "G09",
+"ms": "Gebu kotor.",
+"en": "Gebu is dirty.",
+"note": ""
+},
+{
+"id": "G10",
+"ms": "Gebu mengantuk.",
+"en": "Gebu is sleepy.",
+"note": ""
+},
+{
+"id": "G11",
+"ms": "Gebu bosan.",
+"en": "Gebu is bored.",
+"note": ""
+},
+{
+"id": "G12",
+"ms": "Gebu kesunyian.",
+"en": "Gebu is lonely.",
+"note": ""
+},
+{
+"id": "G13",
+"ms": "Gebu cedera.",
+"en": "Gebu is hurt.",
+"note": ""
+},
+{
+"id": "G14",
+"ms": "Gebu tidak sihat.",
+"en": "Gebu is sick.",
+"note": ""
+},
+{
+"id": "H01",
+"ms": "Apa yang Kiki perlukan?",
+"en": "What does Kiki need?",
+"note": "Nada bertanya"
+},
+{
+"id": "H02",
+"ms": "Perhatikan Kiki baik-baik.",
+"en": "Look at Kiki carefully.",
+"note": ""
+},
+{
+"id": "H03",
+"ms": "Bukan itu yang Kiki perlukan sekarang.",
+"en": "That's not what Kiki needs right now.",
+"note": "Lembut"
+},
+{
+"id": "H04",
+"ms": "Sekarang jom tolong Kiki.",
+"en": "Now let's help Kiki.",
+"note": ""
+},
+{
+"id": "H05",
+"ms": "Tekan Kiki dulu.",
+"en": "Tap Kiki first.",
+"note": ""
+},
+{
+"id": "H06",
+"ms": "Kawan baru! Kenalkan, Kiki.",
+"en": "A new friend! Say hello to Kiki.",
+"note": "Teruja"
+},
+{
+"id": "H07",
+"ms": "Kiki lapar.",
+"en": "Kiki is hungry.",
+"note": ""
+},
+{
+"id": "H08",
+"ms": "Kiki dahaga.",
+"en": "Kiki is thirsty.",
+"note": ""
+},
+{
+"id": "H09",
+"ms": "Kiki kotor.",
+"en": "Kiki is dirty.",
+"note": ""
+},
+{
+"id": "H10",
+"ms": "Kiki mengantuk.",
+"en": "Kiki is sleepy.",
+"note": ""
+},
+{
+"id": "H11",
+"ms": "Kiki bosan.",
+"en": "Kiki is bored.",
+"note": ""
+},
+{
+"id": "H12",
+"ms": "Kiki kesunyian.",
+"en": "Kiki is lonely.",
+"note": ""
+},
+{
+"id": "H13",
+"ms": "Kiki cedera.",
+"en": "Kiki is hurt.",
+"note": ""
+},
+{
+"id": "H14",
+"ms": "Kiki tidak sihat.",
+"en": "Kiki is sick.",
+"note": ""
+}
+]
